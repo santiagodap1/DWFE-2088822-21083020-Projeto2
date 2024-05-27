@@ -19,7 +19,8 @@
 				</div>
 				<div class="hr"></div>
 				<div class="foot-lnk">
-					<a href="#forgot">Forgot Password?</a>
+					<h1 style="color: red;">{{ errMsg }}</h1>
+					<a>Forgot Password? then sorry</a>
 				</div>
 			</div>
 			<div class="sign-up-htm">
@@ -44,24 +45,44 @@
 				</div>
 				<div class="hr"></div>
 				<div class="foot-lnk">
+					<h1 style="color: red;">{{ errMsg }}</h1>
 					<label for="tab-1">Already Member?</label>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
+<!-- <button @click="addPost({comment:'sadasdasda',url:'' },'sda')"></button> -->
+<!-- <button @click="deletePost(2,'sda' )"></button> -->
+<!-- <button @click="getPosts('sda')"></button> -->
+ <!-- <button @click="getPostById('sda',3)"></button>  -->
+
+ <!-- <button @click="likePost('sda','aaa', 1)"></button>
+ <button @click="unlikePost('sda','aaa', 1)"></button> -->
+
+  <!-- <button @click="followUser('a','ad')"></button> 
+ <button @click="unfollowUser('a','ad')"></button> -->
   </template>
   
-  <script setup>
+<script setup>
 import { ref } from 'vue'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 const router = useRouter()
+
 
 var emailSign = ref('')
 var passwordSign = ref('')
 var errMsg = ref()
 var user = ref('')
+
+const emptyForm = () => {
+  email.value = ''
+  password.value = ''
+  emailSign.value = ''
+  passwordSign.value = ''
+  errMsg.value =''
+}
 
 const registerSign = () => {
   const auth = getAuth()
@@ -71,6 +92,7 @@ const registerSign = () => {
       user.value = auth.currentUser
       console.log(auth.currentUser)
       emptyForm()
+	  router.push('/')
     })
     .catch((error) => {
       console.log(error.code)
@@ -85,7 +107,8 @@ const registerSign = () => {
           errMsg.value = 'incorrect password'
           break
         default :
-          errMsg.value = 'email or password incorrect'
+			console.log(error)
+          errMsg.value = error.message
           break
       }
     })
@@ -97,32 +120,47 @@ var password = ref('')
 var confirmPassword = ref('')
 var userName = ref('')
 
-const emptyForm = () => {
-  email.value = ''
-  password.value = ''
-  emailSign.value = ''
-  passwordSign.value = ''
-  errMsg.value =''
-}
 
-const register = () => {
+import { addUser, userExists } from '@/scripts/firebaseScripts';
+
+const register = async () => {
   if (password.value !== confirmPassword.value) {
-    alert('Passwords do not match');
+    errMsg.value = 'Passwords do not match';
     return;
   }
-
+  else if(await userExists(userName.value)){
+    errMsg.value = 'Username already exists';
+    return;
+  }
+  else if(userName.value === ''){
+	errMsg.value = 'Username cannot be empty';
+	return;
+  }
   const auth = getAuth();
   createUserWithEmailAndPassword(auth, email.value, password.value)
     .then((data) => {
       console.log('Successfully registered!');
       user.value = auth.currentUser;
       emptyForm();
+      addUser(userName.value)
+      router.push('/')
     })
     .catch((error) => {
-      console.log(error.code);
-      alert(error.message);
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errMsg.value = 'Email already exists';
+          break;
+        case 'auth/weak-password':
+          errMsg.value = 'Password is too weak';
+          break;
+        default:
+          errMsg.value = error.message;
+          break;
+      }
     });
-};
+}
+
+import {addPost, deletePost, getPosts, getPostById, likePost, unlikePost, followUser, unfollowUser} from '@/scripts/firebaseScripts'
 
 
 </script>
@@ -141,21 +179,25 @@ const register = () => {
 a{color:inherit;text-decoration:none}
 
 .login-wrap{
-	width:100%;
-	margin:auto;
-	max-width:525px;
-	min-height:670px;
-	position:relative;
-	background:url(https://raw.githubusercontent.com/khadkamhn/day-01-login-form/master/img/bg.jpg) no-repeat center;
-	box-shadow:0 12px 15px 0 rgba(0,0,0,.24),0 17px 50px 0 rgba(0,0,0,.19);
+    width:100%;
+    height:100vh; 
+    margin:auto;
+    position:relative;
+    background:linear-gradient(rgba(0, 0, 0, 0.919), rgba(0, 0, 0, 0.698)), url(https://images.unsplash.com/photo-1637825891028-564f672aa42c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D) no-repeat center;
+    box-shadow:0 12px 15px 0 rgba(0,0,0,.24),0 17px 50px 0 rgb(92, 0, 93);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
+
 .login-html{
-	width:100%;
-	height:100%;
-	position:absolute;
-	padding:90px 70px 50px 70px;
-	background:rgba(40,57,101,.9);
+    width:100%;
+	max-width: 600px;
+    height:100%; 
+    position:absolute;
+    padding:90px 70px 50px 70px;
 }
+
 .login-html .sign-in-htm,
 .login-html .sign-up-htm{
 	top:0;
@@ -214,7 +256,6 @@ a{color:inherit;text-decoration:none}
 	background:rgba(255,255,255,.1);
 }
 .login-form .group input[data-type="password"]{
-	/* text-security:circle; */
 	-webkit-text-security:circle;
 }
 .login-form .group .label{
