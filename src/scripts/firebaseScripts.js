@@ -1,6 +1,7 @@
 import { collection, addDoc, doc, setDoc, getDocs, query, where, getDoc, runTransaction } from 'firebase/firestore';
 import {  updateDoc, arrayUnion, arrayRemove, writeBatch, increment } from 'firebase/firestore';
 import db from '../firebase/init.js'
+import { email } from './LogInScripts.js';
 
 
 
@@ -12,12 +13,12 @@ export async function addPost(post, username) {
             const userDoc = await transaction.get(userDocRef);
 
             if (!userDoc.exists()) {
-                const newPost = { postid: 1, comment: post.comment, url: post.url, qt_likes: 0, likes: [] };
+                const newPost = { postid: 1, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') };
                 transaction.set(userDocRef, { username: username, posts: [newPost] });
             } else {
                 const posts = userDoc.data().posts || [];
                 const newPostId = posts.length > 0 ? posts[posts.length - 1].postid + 1 : 1;
-                const newPost = { postid: newPostId, comment: post.comment, url: post.url, qt_likes: 0, likes: [] };
+                const newPost = { postid: newPostId, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') };
                 posts.push(newPost);
                 transaction.update(userDocRef, { posts: posts });
             }
@@ -192,6 +193,7 @@ export async function addUser(username) {
     try {
         await setDoc(userDocRef, {
             username: username,
+            email: email.value,
             qt_followers: 0,
             qt_following: 0,
             following: [],
@@ -281,3 +283,4 @@ export async function unfollowUser(currentUser, userToUnfollow) {
         return false;
     }
 }
+

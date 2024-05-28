@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="flex container h-screen w-full">
+  <div id="app" class="flex container h-screen w-full">
     <!-- side nav -->
     <div class="w-1/5 border-r border-lighter px-6 py-2 flex flex-col justify-between">
       <div>
@@ -7,26 +7,44 @@
           <i class="fab fa-twitter"></i>
         </button>
         <div>
-          <button v-for="tab in tabs" @click="id = tab.id" :class="`focus:outline-none hover:text-blue flex items-center py-2 px-4 hover:bg-lightblue rounded-full mr-auto mb-3 ${ id === tab.id ? 'text-blue' : ''}`">
-            <i :class="`${ tab.icon } text-2xl mr-4 text-left`"></i>
+          <button v-for="tab in tabs" @click="id = tab.id"
+            :class="`focus:outline-none hover:text-blue flex items-center py-2 px-4 hover:bg-lightblue rounded-full mr-auto mb-3 ${id === tab.id ? 'text-blue' : ''}`">
+            <i :class="`${tab.icon} text-2xl mr-4 text-left`"></i>
             <p class="text-lg font-semibold text-left block"> {{ tab.title }} </p>
           </button>
         </div>
-        <button class="text-white bg-blue rounded-full font-semibold focus:outline-none h-auto w-full p-3 hover:bg-darkblue">
+        <button
+          class="text-white bg-blue rounded-full font-semibold focus:outline-none h-auto w-full p-3 hover:bg-darkblue">
           <p class="block">Tweet</p>
           <i class="fas fa-plus hidden"></i>
         </button>
       </div>
       <div class="w-full relative">
-        <button @click="dropdown = true" class="flex items-center w-full hover:bg-lightblue rounded-full p-2 focus:outline-none">
+        <button v-if="isLoggedIn" @click="dropdown = true"
+          class="flex items-center w-full hover:bg-lightblue rounded-full p-2 focus:outline-none">
           <img src="../assets/profile.png" class="w-10 h-10 rounded-full border border-lighter" />
+
           <div class="block ml-4">
-            <p class="text-sm font-bold leading-tight"> Filip8 </p>
-            <p class="text-sm leading-tight"> @FMelim8 </p>
+            <p class="text-sm font-bold leading-tight"> {{userName}} </p>
+            <p class="text-sm leading-tight"> {{email}}{{ emailSign }} </p>
           </div>
+
           <i class="block fas fa-angle-down ml-auto text-lg"></i>
         </button>
-        <div v-if="dropdown === true" class="absolute bottom-0 left-0 w-64 rounded-lg shadow-md border-lightest bg-white mb-16">
+
+        <div v-if="isLoggedIn === false">
+          <router-link :to="`/login`">
+            <button
+              class="text-white bg-blue rounded-full font-semibold focus:outline-none h-auto w-full p-3 hover:bg-darkblue">
+              <p class="block">Log In</p>
+            </button>
+
+          </router-link>
+        </div>
+        
+
+        <div v-if="dropdown === true"
+          class="absolute bottom-0 left-0 w-64 rounded-lg shadow-md border-lightest bg-white mb-16">
           <button @click="dropdown = false" class="p-3 flex items-center w-full hover:bg-lightest focus:outline-none">
             <img src="../assets/profile.png" class="w-10 h-10 rounded-full border border-lighter" />
             <div class="ml-4">
@@ -35,11 +53,10 @@
             </div>
             <i class="fas fa-check ml-auto test-blue"></i>
           </button>
-          <button @click="dropdown = false" class="w-full text-left hover:bg-lightest border-t border-lighter p-3 test-sm focus:outline-none">
-            Add an existing account
-          </button>
-          <button @click="dropdown = false" class="w-full text-left hover:bg-lightest border-t border-lighter p-3 test-sm focus:outline-none">
-            Log out @FMelim8
+          
+          <button @click="signOutUser(); dropdown = false; "
+            class="w-full text-left hover:bg-lightest border-t border-lighter p-3 test-sm focus:outline-none">
+            Log out {{userName}}
           </button>
         </div>
       </div>
@@ -52,17 +69,18 @@
       </div>
       <div class="px-5 py-3 border-b-8 border-lighter flex">
         <div class="flex-none">
-          <img src="../assets/profile.png" class="flex-none w-12 h-12 rounded-full border border-lighter"/>
+          <img src="../assets/profile.png" class="flex-none w-12 h-12 rounded-full border border-lighter" />
         </div>
-        <form v-on:submit.prevent = "addNewTweet" class="w-full px-4 relative">
-          <textarea v-model="tweet.content" placeholder="What's up?" class="mt-3 pb-3 w-full focus:outline-none"/>
+        <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
+          <textarea v-model="tweet.content" placeholder="What's up?" class="mt-3 pb-3 w-full focus:outline-none" />
           <div class="flex items-center">
             <i class="text-lg text-blue mr-4 far fa-image"></i>
             <i class="text-lg text-blue mr-4 fas fa-film"></i>
             <i class="text-lg text-blue mr-4 far fa-chart-bar"></i>
             <i class="text-lg text-blue mr-4 far fa-smile"></i>
           </div>
-          <button type="submit" class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue focus:outline-none rounded-full absolute bottom-0 right-0">
+          <button type="submit"
+            class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue focus:outline-none rounded-full absolute bottom-0 right-0">
             Tweet
           </button>
         </form>
@@ -70,16 +88,16 @@
       <div class="flex flex-col-reverse">
         <div v-for="tweet in tweets" class="w-full p-4 border-b hover:bg-lighter flex">
           <div class="flex-none mr-4">
-            <img src="../assets/profile.png" class="h-12 w-12 rounded-full flex-none"/>
+            <img src="../assets/profile.png" class="h-12 w-12 rounded-full flex-none" />
           </div>
           <div class="w-full">
             <div class="flex items-center w-full">
-              <p class="font-semibold"> Filip8 </p>
-              <p class="text-sm text-dark ml-2"> @FMelim8 </p>
+              <p class="font-semibold"> {{ userName }} </p>
+              <p class="text-sm text-dark ml-2"> {{email}}{{ emailSign }} </p>
               <p class="text-sm text-dark ml-2"> 1 sec </p>
               <i class="fas fa-angle-down text-dark ml-auto"></i>
             </div>
-            <p class="py-2">
+            <p class="py-2 text-left">
               {{ tweet.content }}
             </p>
             <div class="flex items-center justify-between w-full">
@@ -104,7 +122,7 @@
       </div>
       <div v-for="follow in following" class="w-full p-4 border-b hover:bg-lighter flex">
         <div class="flex-none mr-4">
-          <img :src="`${follow.src}`" class="h-12 w-12 rounded-full flex-none"/>
+          <img :src="`${follow.src}`" class="h-12 w-12 rounded-full flex-none" />
         </div>
         <div class="w-full">
           <div class="flex items-center w-full">
@@ -145,11 +163,12 @@
           <p class="text-lg font-bold">Trends for You</p>
           <i class="fas fa-cog text-lg text-blue"></i>
         </div>
-        <button v-for="trend in trending" class="w-full flex justify-between hover:bg-lighter p-3 border-t border-lighter">
+        <button v-for="trend in trending"
+          class="w-full flex justify-between hover:bg-lighter p-3 border-t border-lighter">
           <div>
-            <p class="text-xs text-left leading-tight text-dark"> {{ trend.top}} </p>
-            <p class="font-semibold text-sm text-left leading-tight"> {{ trend.title}} </p>
-            <p class="text-left text-sm leading-tight text-dark"> {{ trend.bottom}} </p>
+            <p class="text-xs text-left leading-tight text-dark"> {{ trend.top }} </p>
+            <p class="font-semibold text-sm text-left leading-tight"> {{ trend.title }} </p>
+            <p class="text-left text-sm leading-tight text-dark"> {{ trend.bottom }} </p>
           </div>
           <i class="fas fa-angle-down text-lg text-dark"></i>
         </button>
@@ -162,7 +181,7 @@
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
         <button v-for="friend in friends" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
-          <img :src="`${ friend.src }`" class="w-12 h-12 rounded-full border border-lighter" />
+          <img :src="`${friend.src}`" class="w-12 h-12 rounded-full border border-lighter" />
           <div class="block ml-4">
             <p class="text-sm font-bold leading-tight"> {{ friend.name }} </p>
             <p class="text-sm leading-tight"> {{ friend.handle }} </p>
@@ -180,55 +199,81 @@
 </template>
 
 <script setup>
-    import { ref, reactive } from 'vue';
-    import '../assets/index.css';
+import { ref, reactive } from 'vue';
+import '../assets/index.css';
+
+import { useAuth } from '@/scripts/LogInScripts';
+
+const { isLoggedIn } = useAuth();
+
+import { 
+  toggleLogin, 
+  emailSign, 
+  passwordSign, 
+  errMsg, 
+  user, 
+  emptyForm, 
+  registerSign, 
+  email, 
+  password, 
+  confirmPassword, 
+  userName, 
+  register, 
+  signOutUser 
+} from '@/scripts/LogInScripts';
 
 
-    const tabs = ref([
-        { icon: 'fas fa-home', title: 'Home', id: 'home' },
-        { icon: 'fas fa-hashtag', title: 'Explore', id: 'explore' },
-        { icon: 'far fa-bell', title: 'Notifications', id: 'notifications' },
-        { icon: 'far fa-envelope', title: 'Messages', id: 'messages' },
-        { icon: 'far fa-bookmark', title: 'Bookmarks', id: 'bookmarks' },
-        { icon: 'fas fa-clipboard-list', title: 'Lists', id: 'lists' },
-        { icon: 'far fa-user', title: 'Profile', id: 'profile' },
-        { icon: 'fas fa-ellipsis-h', title: 'More', id: 'more' },
-    ]);
+const tabs = ref([
+  { icon: 'fas fa-home', title: 'Home', id: 'home' },
+  { icon: 'fas fa-hashtag', title: 'Explore', id: 'explore' },
+  { icon: 'far fa-bell', title: 'Notifications', id: 'notifications' },
+  { icon: 'far fa-envelope', title: 'Messages', id: 'messages' },
+  { icon: 'far fa-bookmark', title: 'Bookmarks', id: 'bookmarks' },
+  { icon: 'fas fa-clipboard-list', title: 'Lists', id: 'lists' },
+  { icon: 'far fa-user', title: 'Profile', id: 'profile' },
+  { icon: 'fas fa-ellipsis-h', title: 'More', id: 'more' },
+]);
 
-    const id = ref('home');
-    const dropdown = ref(false);
+const id = ref('home');
+const dropdown = ref(false);
 
-    const trending = ref([
-        { top: 'Trending in TX', title: 'Gigi', bottom: 'Trending with: Rip Gigi' },
-        { top: 'Music', title: 'We Won', bottom: '135K Tweets' },
-        { top: 'Pop', title: 'Blue Ivy', bottom: '40k tweets' },
-        { top: 'Trending in US', title: 'Denim Day', bottom: '40k tweets' },
-        { top: 'Trending', title: 'When Beyonce', bottom: '25.4k tweets' },
-    ]);
+const trending = ref([
+  { top: 'Trending in TX', title: 'Gigi', bottom: 'Trending with: Rip Gigi' },
+  { top: 'Music', title: 'We Won', bottom: '135K Tweets' },
+  { top: 'Pop', title: 'Blue Ivy', bottom: '40k tweets' },
+  { top: 'Trending in US', title: 'Denim Day', bottom: '40k tweets' },
+  { top: 'Trending', title: 'When Beyonce', bottom: '25.4k tweets' },
+]);
 
-    const friends = ref([
-        { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy' },
-        { src: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fG1hbiUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D', name: 'Adrian Monk', handle: '@detective:)' },
-        { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock' },
-    ]);
+const friends = ref([
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy' },
+  { src: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fG1hbiUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D', name: 'Adrian Monk', handle: '@detective:)' },
+  { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock' },
+]);
 
-    const following = ref([
-        { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: '1,000,003' },
-        { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: '20,003' },
-        { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: '5,000,003' },
-        { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: '5,000,103' },
-    ]);
+const following = ref([
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: '1,000,003' },
+  { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: '20,003' },
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: '5,000,003' },
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: '5,000,103' },
+]);
 
-    const tweets = ref([
-        { content: 'It is so nice outside!' },
-    ]);
+const tweets = ref([
+  { content: 'It is so nice outside!' },
+]);
 
-    const tweet = reactive({ content: '' });
+const tweet = reactive({ content: '' });
 
-    function addNewTweet() {
-        const newTweet = {
-            content: tweet.content
-        };
-        tweets.value.push(newTweet);
-    }
+function addNewTweet() {
+  const newTweet = {
+    content: tweet.content
+  };
+  tweets.value.push(newTweet);
+}
+
+const LandingPage = {
+  name: 'LandingPage',
+};
+
+
 </script>

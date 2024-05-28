@@ -1,10 +1,12 @@
 <template>
-  <Tweets/>
+  <div id="app">
+    <router-view/>
+  </div>
 </template>
 
 <script setup>
-  import Tweets from "./views/TweetsView.vue"
 
+  
 </script>
 
 <style>
@@ -26,6 +28,6 @@ nav a {
 }
 
 nav a.router-link-exact-active {
-  color: #42b983;
+  color: #0091ff;
 }
 </style>

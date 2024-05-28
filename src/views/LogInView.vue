@@ -1,5 +1,11 @@
 <template>
   <div class="login-wrap">
+	<router-link :to="`/`">
+			<button style="position: absolute; top: 70px; left: 70px; color: red; font-size: 30px; font-weight: 900; ">
+				X
+            </button>
+
+          </router-link>
 	<div class="login-html">
 		<input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">Sign In</label>
 		<input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">Sign Up</label>
@@ -7,6 +13,10 @@
 			<div class="sign-in-htm">
 				<div class="group">
 					<label for="user" class="label" >Username</label>
+					<input id="user" type="text" class="input"  v-model="userName">
+				</div>
+				<div class="group">
+					<label for="user" class="label" >Email</label>
 					<input id="user" type="text" class="input"  v-model="emailSign">
 				</div>
 				<div class="group">
@@ -15,7 +25,7 @@
 				</div>
 				
 				<div class="group">
-					<input type="submit" class="button" value="Sign In" @click="registerSign">
+					<input type="submit" class="button" value="Sign In" @click="registerSign(router)">
 				</div>
 				<div class="hr"></div>
 				<div class="foot-lnk">
@@ -41,7 +51,7 @@
 					<input id="pass" type="text" class="input" v-model="email">
 				</div>
 				<div class="group">
-					<input type="submit" class="button" value="Sign Up" @click="register">
+					<input type="submit" class="button" value="Sign Up" @click="register(router)">
 				</div>
 				<div class="hr"></div>
 				<div class="foot-lnk">
@@ -52,7 +62,7 @@
 		</div>
 	</div>
 </div>
-<!-- <button @click="addPost({comment:'sadasdasda',url:'' },'sda')"></button> -->
+<!-- <button @click="addPost({comment:'sadasdasda',url:'' },'sda')">dfdfdfd</button> -->
 <!-- <button @click="deletePost(2,'sda' )"></button> -->
 <!-- <button @click="getPosts('sda')"></button> -->
  <!-- <button @click="getPostById('sda',3)"></button>  -->
@@ -66,99 +76,26 @@
   
 <script setup>
 import { ref } from 'vue'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 const router = useRouter()
 
 
-var emailSign = ref('')
-var passwordSign = ref('')
-var errMsg = ref()
-var user = ref('')
-
-const emptyForm = () => {
-  email.value = ''
-  password.value = ''
-  emailSign.value = ''
-  passwordSign.value = ''
-  errMsg.value =''
-}
-
-const registerSign = () => {
-  const auth = getAuth()
-  signInWithEmailAndPassword(auth, emailSign.value, passwordSign.value)
-    .then((data) => {
-      console.log('Succesfully signed in')
-      user.value = auth.currentUser
-      console.log(auth.currentUser)
-      emptyForm()
-	  router.push('/')
-    })
-    .catch((error) => {
-      console.log(error.code)
-      switch (error.code) {
-        case "auth/invalid-email":
-          errMsg.value = 'Invalid email'
-          break
-        case "auth/user-not-found":
-          errMsg.value = 'there is not an account with that email'
-          break
-        case "auth/wrong-password":
-          errMsg.value = 'incorrect password'
-          break
-        default :
-			console.log(error)
-          errMsg.value = error.message
-          break
-      }
-    })
-}
-
-
-var email = ref('')
-var password = ref('')
-var confirmPassword = ref('')
-var userName = ref('')
-
-
-import { addUser, userExists } from '@/scripts/firebaseScripts';
-
-const register = async () => {
-  if (password.value !== confirmPassword.value) {
-    errMsg.value = 'Passwords do not match';
-    return;
-  }
-  else if(await userExists(userName.value)){
-    errMsg.value = 'Username already exists';
-    return;
-  }
-  else if(userName.value === ''){
-	errMsg.value = 'Username cannot be empty';
-	return;
-  }
-  const auth = getAuth();
-  createUserWithEmailAndPassword(auth, email.value, password.value)
-    .then((data) => {
-      console.log('Successfully registered!');
-      user.value = auth.currentUser;
-      emptyForm();
-      addUser(userName.value)
-      router.push('/')
-    })
-    .catch((error) => {
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errMsg.value = 'Email already exists';
-          break;
-        case 'auth/weak-password':
-          errMsg.value = 'Password is too weak';
-          break;
-        default:
-          errMsg.value = error.message;
-          break;
-      }
-    });
-}
+import { 
+    toggleLogin, 
+    emailSign, 
+    passwordSign, 
+    errMsg, 
+    user, 
+    emptyForm, 
+    registerSign, 
+    email, 
+    password, 
+    confirmPassword, 
+    userName, 
+    register, 
+    signOutUser 
+  } from '@/scripts/LogInScripts';
 
 import {addPost, deletePost, getPosts, getPostById, likePost, unlikePost, followUser, unfollowUser} from '@/scripts/firebaseScripts'
 
