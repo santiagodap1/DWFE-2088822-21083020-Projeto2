@@ -79,7 +79,9 @@
         <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
           <textarea v-model="tweet.content" placeholder="What's up?" class="mt-3 pb-3 w-full focus:outline-none" />
           <div class="flex items-center">
-            <i class="text-lg text-blue mr-4 far fa-image"></i>
+            <button @click="showModal = true">
+              <i class="text-lg text-blue mr-4 far fa-image"></i>
+            </button>
             <i class="text-lg text-blue mr-4 fas fa-film"></i>
             <i class="text-lg text-blue mr-4 far fa-chart-bar"></i>
             <i class="text-lg text-blue mr-4 far fa-smile"></i>
@@ -103,7 +105,7 @@
               <i class="fas fa-angle-down text-dark ml-auto"></i>
             </div>
             <p class="py-2 text-left">
-              {{ tweet.content }}
+              {{ tweet }}
             </p>
             <div class="flex items-center justify-between w-full">
               <div class="flex items-center text-sm text-dark">
@@ -186,22 +188,22 @@
             <p class="text-sm text-dark ml-2"> {{ follow.time }} </p>
             <i class="fas fa-angle-down text-dark ml-auto"></i>
           </div>
-          <p class="py-2">
-            {{ follow.tweet }}
-          </p>
+            <p class="py-2 text-left">
+              {{ follow.tweet }}
+            </p>
           <div class="flex items-center justify-between w-full">
-            <div class="flex items-center text-sm text-dark">
+            <button class="flex items-center text-sm text-dark" @click="">
               <i class="far fa-comment mr-3"></i>
               <p> {{ follow.comments }} </p>
-            </div>
+            </button>
             <div class="flex items-center text-sm text-dark">
               <i class="fas fa-retweet mr-3"></i>
               <p> {{ follow.retweets }} </p>
             </div>
-            <div class="flex items-center text-sm text-dark">
+            <button :class="`flex items-center text-sm ${follow.isLiked ? 'text-pink-500' : 'text-dark'}`" @click="toggleLike( follow )">
               <i class="fas fa-heart mr-3"></i>
-              <p> {{ follow.like }} </p>
-            </div>
+              <p> {{ follow.like }}</p>
+            </button>
             <div class="flex items-center text-sm text-dark">
               <i class="fas fa-share-square mr-3"></i>
             </div>
@@ -257,13 +259,32 @@
       </div>
     </div>
   </div>
+  <ImageUpload :show="showModal" @close="showModal = false" @upload="handleImageUpload()" />
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import '../assets/index.css';
-
+import ImageUpload from './ImageUpload.vue';
 import { useAuth } from '@/scripts/LogInScripts';
+
+const showModal = ref(false);
+
+const handleImageUpload = (url) => {
+  tweets.value.push({ content: 'It is so nice outside!', image: url })
+};
+
+function toggleLike( post ) {
+  
+  if (post.isLiked){
+    post.isLiked = false;
+    post.like -= 1;
+  }
+  else {
+    post.isLiked = true;
+    post.like += 1;
+  }
+};
 
 const { isLoggedIn } = useAuth();
 
@@ -327,21 +348,22 @@ const friends = ref([
 ]);
 
 const following = ref([
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: '1,000,003' },
-  { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: '20,003' },
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: '5,000,003' },
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: '5,000,103' },
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: 120000, postId: 1, isLiked: false },
+  { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: 20003, postId: 2, isLiked: false },
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: 5000003, postId: 3, isLiked: false },
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: 5000103, postId:4, isLiked: false },
 ]);
 
 const tweets = ref([
-  { content: 'It is so nice outside!' },
+  { content: 'It is so nice outside!', image: "" },
 ]);
 
-const tweet = reactive({ content: '' });
+const tweet = reactive({ content: "", image:"" });
 
 function addNewTweet() {
   const newTweet = {
-    content: tweet.content
+    content: tweet.content,
+    image: tweet.image
   };
   tweets.value.push(newTweet);
 }
