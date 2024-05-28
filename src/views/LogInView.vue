@@ -62,16 +62,17 @@
 		</div>
 	</div>
 </div>
-<!-- <button @click="addPost({comment:'sadasdasda',url:'' },'sda')">dfdfdfd</button> -->
+<!-- <button @click="addPost({comment:'andamos andando',url:'https://images.unsplash.com/photo-1637825891028-564f672aa42c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },'a2', 'ando2@gmail.com')">dfdfdfd</button> -->
 <!-- <button @click="deletePost(2,'sda' )"></button> -->
 <!-- <button @click="getPosts('sda')"></button> -->
  <!-- <button @click="getPostById('sda',3)"></button>  -->
 
- <!-- <button @click="likePost('sda','aaa', 1)"></button>
- <button @click="unlikePost('sda','aaa', 1)"></button> -->
+ <!-- <button @click="likePost('sda','a2', 2)">ss</button> -->
+ <!-- <button @click="unlikePost('sda','aaa', 1)"></button> -->
 
-  <!-- <button @click="followUser('a','ad')"></button> 
- <button @click="unfollowUser('a','ad')"></button> -->
+  <!-- <button @click="followUser('sda','a2')">ds</button>  -->
+ <!-- <button @click="unfollowUser('a','ad')"></button> -->
+ <!-- <button @click="getPostsFollowing('sda')">sdsd</button> -->
   </template>
   
 <script setup>
@@ -97,7 +98,7 @@ import {
     signOutUser 
   } from '@/scripts/LogInScripts';
 
-import {addPost, deletePost, getPosts, getPostById, likePost, unlikePost, followUser, unfollowUser} from '@/scripts/firebaseScripts'
+import {addPost, deletePost, getPosts, getPostById, likePost, unlikePost, followUser, unfollowUser, getPostsFollowing} from '@/scripts/firebaseScripts'
 
 
 </script>

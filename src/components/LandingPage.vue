@@ -62,7 +62,12 @@
       </div>
     </div>
     <!-- tweets -->
-    <div class="w-full md:w-1/2 h-full overflow-y-scroll">
+    <div v-if="isLoggedIn == false" class="w-full md:w-1/2 h-full overflow-y-scroll" style="display: flex;
+      justify-content: center; align-items: center;">
+      <h1 style="color: red; color: red; font-size: 30px; font-weight: 900;">You have to log in</h1>
+    </div>
+
+    <div class="w-full md:w-1/2 h-full overflow-y-scroll" v-if="isLoggedIn">
       <div class="px-5 py-3 border-b border-lighter flex items-center justify-between">
         <h1 class="text-xl font-bold">Home</h1>
         <i class="far fa-star text-xl text-blue"></i>
@@ -120,6 +125,56 @@
           </div>
         </div>
       </div>
+      
+
+
+
+
+
+      
+
+
+
+      <div class="flex flex-col-reverse">
+        <div v-for="post in posts" class="w-full p-4 border-b hover:bg-lighter flex">
+          <div class="flex-none mr-4">
+            <img src="../assets/profile.png" class="h-12 w-12 rounded-full flex-none" />
+          </div>
+          <div class="w-full">
+            <div class="flex items-center w-full">
+              <p class="font-semibold"> {{post.username}} </p>
+              <p class="text-sm text-dark ml-2"> {{post.email}} </p>
+              <p class="text-sm text-dark ml-2"> {{post.created_at}} </p>
+              
+              <i class="fas fa-angle-down text-dark ml-auto"></i>
+            </div>
+            <img :src="post.url" alt="" v-if="post.url != ''" style="max-width: 400px;">
+            <p class="py-2 text-left">
+              {{ post.comment }}
+            </p>
+            <div class="flex items-center justify-between w-full">
+              
+              <div class="flex items-center text-sm text-dark">
+                <i class="fas fa-heart mr-3"></i>
+                <p> {{ post.qt_likes  }} </p>
+              </div>
+              <div class="flex items-center text-sm text-dark">
+                <i class="fas fa-share-square mr-3"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
       <div v-for="follow in following" class="w-full p-4 border-b hover:bg-lighter flex">
         <div class="flex-none mr-4">
           <img :src="`${follow.src}`" class="h-12 w-12 rounded-full flex-none" />
@@ -176,12 +231,18 @@
           Show More
         </button>
       </div>
+      
+
+
+
+
       <div class="w-full rounded-lg bg-lightest my-4">
         <div class=" p-3">
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
-        <button v-for="friend in friends" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
-          <img :src="`${friend.src}`" class="w-12 h-12 rounded-full border border-lighter" />
+        
+        <button v-for="user in usersFromFirebase" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+          <img src="" class="w-12 h-12 rounded-full border border-lighter" />
           <div class="block ml-4">
             <p class="text-sm font-bold leading-tight"> {{ friend.name }} </p>
             <p class="text-sm leading-tight"> {{ friend.handle }} </p>
@@ -199,12 +260,15 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import '../assets/index.css';
 
 import { useAuth } from '@/scripts/LogInScripts';
 
 const { isLoggedIn } = useAuth();
+
+import { getPosts, postsToShow , getPostsFollowing, getUsers} from '@/scripts/firebaseScripts';
+
 
 import { 
   toggleLogin, 
@@ -222,6 +286,17 @@ import {
   signOutUser 
 } from '@/scripts/LogInScripts';
 
+let posts = ref([]);
+let usersFromFirebase = ref([]);
+
+onMounted(async () => {
+  if (isLoggedIn.value) {
+    const userPosts = await getPosts(userName.value);
+    const followingPosts = await getPostsFollowing(userName.value);
+    posts.value = userPosts.concat(followingPosts);
+
+  }
+});
 
 const tabs = ref([
   { icon: 'fas fa-home', title: 'Home', id: 'home' },

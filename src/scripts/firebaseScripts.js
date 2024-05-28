@@ -1,11 +1,11 @@
 import { collection, addDoc, doc, setDoc, getDocs, query, where, getDoc, runTransaction } from 'firebase/firestore';
-import {  updateDoc, arrayUnion, arrayRemove, writeBatch, increment } from 'firebase/firestore';
+import {  updateDoc, arrayUnion, arrayRemove, writeBatch, increment, getFirestore } from 'firebase/firestore';
 import db from '../firebase/init.js'
 import { email } from './LogInScripts.js';
+import { ref } from 'vue';  
+export var postsToShow = ref([])
 
-
-
-export async function addPost(post, username) {
+export async function addPost(post, username, email) {
     const userDocRef = doc(db, 'posts', username);
 
     try {
@@ -13,12 +13,12 @@ export async function addPost(post, username) {
             const userDoc = await transaction.get(userDocRef);
 
             if (!userDoc.exists()) {
-                const newPost = { postid: 1, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') };
-                transaction.set(userDocRef, { username: username, posts: [newPost] });
+                const newPost = { postid: 1, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') , username: username, email: email};
+                transaction.set(userDocRef, { username: username, email: email, posts: [newPost] });
             } else {
                 const posts = userDoc.data().posts || [];
                 const newPostId = posts.length > 0 ? posts[posts.length - 1].postid + 1 : 1;
-                const newPost = { postid: newPostId, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') };
+                const newPost = { postid: newPostId, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' '), username: username, email: email };
                 posts.push(newPost);
                 transaction.update(userDocRef, { posts: posts });
             }
@@ -65,6 +65,8 @@ export async function getPosts(username) {
 
         if (userDoc.exists()) {
             const posts = userDoc.data().posts || [];
+            postsToShow.value += posts
+            // console.log(posts);
             return posts;
         } else {
             console.log('User not found');
@@ -75,6 +77,39 @@ export async function getPosts(username) {
         return [];
     }
 }
+
+export async function getPostsFollowing(username) {
+    const userDocRef = doc(db, 'users', username);
+
+    try {
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            const following = userDoc.data().following || [];
+            let posts = [];
+
+            for (let i = 0; i < following.length; i++) {
+                const followingUserDocRef = doc(db, 'posts', following[i]);
+                const followingUserDoc = await getDoc(followingUserDocRef);
+
+                if (followingUserDoc.exists()) {
+                    const followingUserPosts = followingUserDoc.data().posts || [];
+                    posts = [...posts, ...followingUserPosts];
+                }
+            }
+
+            postsToShow.value += posts;
+            return posts;
+        } else {
+            console.log('User not found');
+            return [];
+        }
+    } catch (error) {
+        console.error('Error getting posts: ', error);
+        return [];
+    }
+}
+
 
 export async function getPostById(username, postId) {
     const userDocRef = doc(db, 'posts', username);
@@ -284,3 +319,17 @@ export async function unfollowUser(currentUser, userToUnfollow) {
     }
 }
 
+
+export async function getUsers() {
+    const usersCollectionRef = collection(db, 'users');
+
+    try {
+        const usersSnapshot = await getDocs(usersCollectionRef);
+        const users = usersSnapshot.docs.map(doc => doc.data());
+        console.log(users);
+        return users;
+    } catch (error) {
+        console.error('Error getting users: ', error);
+        return [];
+    }
+}
