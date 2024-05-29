@@ -203,6 +203,33 @@ export async function unlikePost(posterUsername, likerUsername, postId) {
     }
 }
 
+export async function userLikedPost(posterUserName, likerUserName, postId) {
+    
+    const postDocRef = doc(db, 'posts', posterUserName);
+
+    
+    const postDoc = await getDoc(postDocRef);
+    if (postDoc.exists()) {
+    
+        const postData = postDoc.data();
+
+    
+        const post = postData.posts.find(post => post.postid === postId);
+
+    
+        if (post && post.likes.includes(likerUserName)) {
+            // console.log('User has liked the post');
+            return true;
+        } else {
+            // console.log('User has not liked the post');
+            return false;
+        }
+    } else {
+        // console.error('Post does not exist');
+        return false;
+    }
+}
+
 export async function userExists(username) {
     const userDocRef = doc(db, 'users', username);
 
@@ -221,7 +248,7 @@ export async function userExists(username) {
     }
 }
 
-export async function addUser(username) {
+export async function addUser(username, pictureProfile) {
 
     const userDocRef = doc(db, 'users', username);
 
@@ -232,7 +259,8 @@ export async function addUser(username) {
             qt_followers: 0,
             qt_following: 0,
             following: [],
-            followers: []
+            followers: [],
+            pictureProfile: pictureProfile
         });
         console.log('User added successfully');
         return true;
@@ -317,6 +345,24 @@ export async function unfollowUser(currentUser, userToUnfollow) {
         console.error('Error unfollowing user: ', error);
         return false;
     }
+}
+
+export async function isUserFollowing(currentUsername, targetUsername) {
+    const userDocRef = doc(db, 'users', currentUsername);
+  
+    try {
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          return userData.following.includes(targetUsername);
+        } else {
+          console.log('No such user!');
+          return false;
+        }
+      } catch (error) {
+        console.error('Error getting user: ', error);
+        return false;
+      }
 }
 
 

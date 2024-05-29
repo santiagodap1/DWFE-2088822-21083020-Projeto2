@@ -13,11 +13,7 @@
             <p class="text-lg font-semibold text-left block"> {{ tab.title }} </p>
           </button>
         </div>
-        <button
-          class="text-white bg-blue rounded-full font-semibold focus:outline-none h-auto w-full p-3 hover:bg-darkblue">
-          <p class="block">Tweet</p>
-          <i class="fas fa-plus hidden"></i>
-        </button>
+
       </div>
       <div class="w-full relative">
         <button v-if="isLoggedIn" @click="dropdown = true"
@@ -25,8 +21,8 @@
           <img src="../assets/profile.png" class="w-10 h-10 rounded-full border border-lighter" />
 
           <div class="block ml-4">
-            <p class="text-sm font-bold leading-tight"> {{userName}} </p>
-            <p class="text-sm leading-tight"> {{email}}{{ emailSign }} </p>
+            <p class="text-sm font-bold leading-tight"> {{ userName }} </p>
+            <p class="text-sm leading-tight"> {{ email }}{{ emailSign }} </p>
           </div>
 
           <i class="block fas fa-angle-down ml-auto text-lg"></i>
@@ -41,22 +37,22 @@
 
           </router-link>
         </div>
-        
+
 
         <div v-if="dropdown === true"
           class="absolute bottom-0 left-0 w-64 rounded-lg shadow-md border-lightest bg-white mb-16">
           <button @click="dropdown = false" class="p-3 flex items-center w-full hover:bg-lightest focus:outline-none">
             <img src="../assets/profile.png" class="w-10 h-10 rounded-full border border-lighter" />
             <div class="ml-4">
-              <p class="text-sm font-bold leading-tight"> Filip8 </p>
-              <p class="text-sm leading-tight"> @FMelim8 </p>
+              <p class="text-sm font-bold leading-tight"> {{ userName }} </p>
+              <p class="text-sm leading-tight"> {{ email }}{{ emailSign }} </p>
             </div>
             <i class="fas fa-check ml-auto test-blue"></i>
           </button>
-          
-          <button @click="signOutUser(); dropdown = false; "
+
+          <button @click="signOutUser(); dropdown = false;"
             class="w-full text-left hover:bg-lightest border-t border-lighter p-3 test-sm focus:outline-none">
-            Log out {{userName}}
+            Log out {{ userName }}
           </button>
         </div>
       </div>
@@ -70,7 +66,7 @@
     <div class="w-full md:w-1/2 h-full overflow-y-scroll" v-if="isLoggedIn">
       <div class="px-5 py-3 border-b border-lighter flex items-center justify-between">
         <h1 class="text-xl font-bold">Home</h1>
-        <i class="far fa-star text-xl text-blue"></i>
+
       </div>
       <div class="px-5 py-3 border-b-8 border-lighter flex">
         <div class="flex-none">
@@ -100,7 +96,7 @@
           <div class="w-full">
             <div class="flex items-center w-full">
               <p class="font-semibold"> {{ userName }} </p>
-              <p class="text-sm text-dark ml-2"> {{email}}{{ emailSign }} </p>
+              <p class="text-sm text-dark ml-2"> {{ email }}{{ emailSign }} </p>
               <p class="text-sm text-dark ml-2"> 1 sec </p>
               <i class="fas fa-angle-down text-dark ml-auto"></i>
             </div>
@@ -127,13 +123,13 @@
           </div>
         </div>
       </div>
-      
 
 
 
 
 
-      
+
+
 
 
 
@@ -144,10 +140,10 @@
           </div>
           <div class="w-full">
             <div class="flex items-center w-full">
-              <p class="font-semibold"> {{post.username}} </p>
-              <p class="text-sm text-dark ml-2"> {{post.email}} </p>
-              <p class="text-sm text-dark ml-2"> {{post.created_at}} </p>
-              
+              <p class="font-semibold"> {{ post.username }} </p>
+              <p class="text-sm text-dark ml-2"> {{ post.email }} </p>
+              <p class="text-sm text-dark ml-2"> {{ post.created_at }} </p>
+
               <i class="fas fa-angle-down text-dark ml-auto"></i>
             </div>
             <img :src="post.url" alt="" v-if="post.url != ''" style="max-width: 400px;">
@@ -155,11 +151,21 @@
               {{ post.comment }}
             </p>
             <div class="flex items-center justify-between w-full">
-              
-              <div class="flex items-center text-sm text-dark">
+
+
+
+              <button v-if="userLikedPostsMap[post.postid]" class="flex items-center text-sm text-pink-500"
+                @click="unlikePost(post.username, userName, post.postid)">
                 <i class="fas fa-heart mr-3"></i>
-                <p> {{ post.qt_likes  }} </p>
-              </div>
+                <p> {{ post.qt_likes }}</p>
+              </button>
+
+              <button v-else class="flex items-center text-sm text-dark"
+                @click="likePost(post.username, userName, post.postid);">
+                <i class="fas fa-heart mr-3"></i>
+                <p> {{ post.qt_likes }}</p>
+              </button>
+
               <div class="flex items-center text-sm text-dark">
                 <i class="fas fa-share-square mr-3"></i>
               </div>
@@ -188,9 +194,9 @@
             <p class="text-sm text-dark ml-2"> {{ follow.time }} </p>
             <i class="fas fa-angle-down text-dark ml-auto"></i>
           </div>
-            <p class="py-2 text-left">
-              {{ follow.tweet }}
-            </p>
+          <p class="py-2 text-left">
+            {{ follow.tweet }}
+          </p>
           <div class="flex items-center justify-between w-full">
             <button class="flex items-center text-sm text-dark" @click="">
               <i class="far fa-comment mr-3"></i>
@@ -200,7 +206,8 @@
               <i class="fas fa-retweet mr-3"></i>
               <p> {{ follow.retweets }} </p>
             </div>
-            <button :class="`flex items-center text-sm ${follow.isLiked ? 'text-pink-500' : 'text-dark'}`" @click="toggleLike( follow )">
+            <button :class="`flex items-center text-sm ${follow.isLiked ? 'text-pink-500' : 'text-dark'}`"
+              @click="toggleLike(follow)">
               <i class="fas fa-heart mr-3"></i>
               <p> {{ follow.like }}</p>
             </button>
@@ -233,7 +240,7 @@
           Show More
         </button>
       </div>
-      
+
 
 
 
@@ -242,17 +249,28 @@
         <div class=" p-3">
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
-        
-        <button v-for="user in usersFromFirebase" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
-          <img src="" class="w-12 h-12 rounded-full border border-lighter" />
-          <div class="block ml-4">
-            <p class="text-sm font-bold leading-tight"> {{ friend.name }} </p>
-            <p class="text-sm leading-tight"> {{ friend.handle }} </p>
+
+        <div v-if="isLoggedIn">
+          <div v-for="user in usersFromFirebase" :key="user.username"
+            class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+            <img src="../assets/profile.png" class="w-12 h-12 rounded-full border border-lighter" />
+            <div class="block ml-4">
+              <p class="text-sm font-bold leading-tight">{{ user.username }}</p>
+              <p class="text-sm leading-tight">{{ user.email }}</p>
+            </div>
+            <button v-if="followingStatus[user.username]" @click="unfollowUser(userName, user.username)"
+              class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+              Unfollow
+            </button>
+            <button v-else @click="followUser(userName, user.username)"
+              class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+              Follow
+            </button>
           </div>
-          <button class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
-            Follow
-          </button>
-        </button>
+        </div>
+        <div v-else>
+          <h1 class="text-red font-bold">You must log in</h1>
+        </div>
         <button class="p-3 w-full hover:bg-lighter text-left text-blue border-t border-lighter">
           Show More
         </button>
@@ -260,10 +278,14 @@
     </div>
   </div>
   <ImageUpload :show="showModal" @close="showModal = false" @upload="handleImageUpload()" />
+
+
+
+
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import '../assets/index.css';
 import ImageUpload from './ImageUpload.vue';
 import { useAuth } from '@/scripts/LogInScripts';
@@ -274,9 +296,9 @@ const handleImageUpload = (url) => {
   tweets.value.push({ content: 'It is so nice outside!', image: url })
 };
 
-function toggleLike( post ) {
-  
-  if (post.isLiked){
+function toggleLike(post) {
+
+  if (post.isLiked) {
     post.isLiked = false;
     post.like -= 1;
   }
@@ -288,36 +310,98 @@ function toggleLike( post ) {
 
 const { isLoggedIn } = useAuth();
 
-import { getPosts, postsToShow , getPostsFollowing, getUsers} from '@/scripts/firebaseScripts';
 
+// import {
+//   getPosts, getPostById, postsToShow, getPostsFollowing,
+//   getUsers, likePost as likePostFirebase, unlikePost as unlikePostFirebase,
+//   userLikedPost, isUserFollowing, unfollowUser, followUser
+// } from '@/scripts/firebaseScripts'
+import {
+  getPosts, getPostById, postsToShow, getPostsFollowing,
+  getUsers, likePost as likePostFirebase, unlikePost as unlikePostFirebase,
+  userLikedPost, isUserFollowing as isUserFollowingFirebase, unfollowUser as unfollowUserFirebase, followUser as followUserFirebase
+} from '@/scripts/firebaseScripts'
 
-import { 
-  toggleLogin, 
-  emailSign, 
-  passwordSign, 
-  errMsg, 
-  user, 
-  emptyForm, 
-  registerSign, 
-  email, 
-  password, 
-  confirmPassword, 
-  userName, 
-  register, 
-  signOutUser 
+import {
+  toggleLogin,
+  emailSign,
+  passwordSign,
+  errMsg,
+  user,
+  emptyForm,
+  registerSign,
+  email,
+  password,
+  confirmPassword,
+  userName,
+  register,
+  signOutUser
 } from '@/scripts/LogInScripts';
 
 let posts = ref([]);
 let usersFromFirebase = ref([]);
 
-onMounted(async () => {
+
+
+let userLikedPostsMap = ref({});
+let followingStatus = ref({});
+
+async function loadPosts() {
   if (isLoggedIn.value) {
     const userPosts = await getPosts(userName.value);
     const followingPosts = await getPostsFollowing(userName.value);
     posts.value = userPosts.concat(followingPosts);
 
+    let promises = posts.value.map(post => userLikedPost(post.username, userName.value, post.postid));
+    let results = await Promise.all(promises);
+    results.forEach((result, index) => {
+      userLikedPostsMap.value[posts.value[index].postid] = result;
+    });
   }
-});
+  usersFromFirebase.value = await getUsers();
+  updateFollowingStatus();
+}
+
+async function updateFollowingStatus() {
+  for (const user of usersFromFirebase.value) {
+    followingStatus.value[user.username] = await isUserFollowingFirebase(userName.value, user.username);
+  }
+}
+
+async function likePost(postUsername, currentUserName, postId) {
+  await likePostFirebase(postUsername, currentUserName, postId);
+  userLikedPostsMap.value[postId] = true;
+
+  await loadPosts();
+}
+
+async function unlikePost(postUsername, currentUserName, postId) {
+  await unlikePostFirebase(postUsername, currentUserName, postId);
+  userLikedPostsMap.value[postId] = false;
+
+  await loadPosts();
+
+}
+
+async function followUser(currentUser, targetUser) {
+  await followUserFirebase(currentUser, targetUser);
+  followingStatus.value[targetUser] = true;
+  await loadPosts();
+}
+
+async function unfollowUser(currentUser, targetUser) {
+  await unfollowUserFirebase(currentUser, targetUser);
+  followingStatus.value[targetUser] = false;
+  await loadPosts();
+}
+
+watch(usersFromFirebase, updateFollowingStatus, { immediate: true });
+
+onMounted(loadPosts);
+
+
+
+
 
 const tabs = ref([
   { icon: 'fas fa-home', title: 'Home', id: 'home' },
@@ -351,14 +435,14 @@ const following = ref([
   { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: 120000, postId: 1, isLiked: false },
   { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: 20003, postId: 2, isLiked: false },
   { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: 5000003, postId: 3, isLiked: false },
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: 5000103, postId:4, isLiked: false },
+  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: 5000103, postId: 4, isLiked: false },
 ]);
 
 const tweets = ref([
   { content: 'It is so nice outside!', image: "" },
 ]);
 
-const tweet = reactive({ content: "", image:"" });
+const tweet = reactive({ content: "", image: "" });
 
 function addNewTweet() {
   const newTweet = {

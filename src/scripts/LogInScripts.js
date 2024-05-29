@@ -38,42 +38,7 @@ const emptyForm = () => {
 var userName = ref('')
 import db from '../firebase/init.js'
 
-// const registerSign = (router) => {
-    
-//   const auth = getAuth()
-//   signInWithEmailAndPassword(auth, emailSign.value, passwordSign.value)
-//     .then((data) => {
-//       console.log('Succesfully signed in')
-//       user.value = auth.currentUser
-//       console.log(auth.currentUser)
-//       toggleLogin();
-//       router.push('/')
 
-      
-      
-//     })
-//     .catch((error) => {
-//       console.log(error.code)
-//       switch (error.code) {
-//         case "auth/invalid-email":
-//           errMsg.value = 'Invalid email'
-//           break
-//         case "auth/user-not-found":
-//           errMsg.value = 'there is not an account with that email'
-//           break
-//         case "auth/wrong-password":
-//           errMsg.value = 'incorrect password'
-//           break
-//           case "auth/invalid-credential":
-//             errMsg.value = 'incorrect password or email'
-//             break
-//         default :
-// 			console.log(error)
-//           errMsg.value = error.message
-//           break
-//       }
-//     })
-// }
 const registerSign = async (router) => {
     const auth = getAuth();
     const userDocRef = doc(db, 'users', userName.value);
