@@ -106,6 +106,7 @@
             </div>
             <p class="py-2 text-left">
               {{ tweet }}
+              {{  }}
             </p>
             <div class="flex items-center justify-between w-full">
               <div class="flex items-center text-sm text-dark">
@@ -127,16 +128,6 @@
           </div>
         </div>
       </div>
-      
-
-
-
-
-
-      
-
-
-
       <div class="flex flex-col-reverse">
         <div v-for="post in posts" class="w-full p-4 border-b hover:bg-lighter flex">
           <div class="flex-none mr-4">
@@ -167,16 +158,6 @@
           </div>
         </div>
       </div>
-
-
-
-
-
-
-
-
-
-
       <div v-for="follow in following" class="w-full p-4 border-b hover:bg-lighter flex">
         <div class="flex-none mr-4">
           <img :src="`${follow.src}`" class="h-12 w-12 rounded-full flex-none" />
@@ -233,16 +214,10 @@
           Show More
         </button>
       </div>
-      
-
-
-
-
       <div class="w-full rounded-lg bg-lightest my-4">
         <div class=" p-3">
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
-        
         <button v-for="user in usersFromFirebase" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
           <img src="" class="w-12 h-12 rounded-full border border-lighter" />
           <div class="block ml-4">
@@ -259,7 +234,7 @@
       </div>
     </div>
   </div>
-  <ImageUpload :show="showModal" @close="showModal = false" @upload="handleImageUpload()" />
+  <ImageUpload :show="showModal" @close="showModal = false" @upload="handleImageUpload" />
 </template>
 
 <script setup>
@@ -268,10 +243,13 @@ import '../assets/index.css';
 import ImageUpload from './ImageUpload.vue';
 import { useAuth } from '@/scripts/LogInScripts';
 
+const imageUrl = ref('')
+
 const showModal = ref(false);
 
-const handleImageUpload = (url) => {
-  tweets.value.push({ content: 'It is so nice outside!', image: url })
+const handleImageUpload = (Url) => {
+  imageUrl.value = (Url);
+  console.log(imageUrl)
 };
 
 function toggleLike( post ) {
@@ -363,7 +341,7 @@ const tweet = reactive({ content: "", image:"" });
 function addNewTweet() {
   const newTweet = {
     content: tweet.content,
-    image: tweet.image
+    image: imageUrl
   };
   tweets.value.push(newTweet);
 }
