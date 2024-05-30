@@ -40,6 +40,7 @@ Para seguir ou deixar de seguir utilizadores tem o botão para cada ação na se
 # Gostar e deixar de gostar post
 Para isto tem de carregar no botão que é um coração.
 
-
+## darkmode lightmode
+para mudar entre os temas pode carregar em Dark theme no side bar a esquerda.
 
 
