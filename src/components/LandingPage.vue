@@ -124,13 +124,13 @@
           </div>
         </div>
       </div>
-      
 
 
 
 
 
-      
+
+
 
 
 
@@ -231,7 +231,7 @@
           Show More
         </button>
       </div>
-      
+
 
 
 
@@ -240,24 +240,35 @@
         <div class=" p-3">
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
-        
-        <button v-for="user in usersFromFirebase" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
-          <img src="" class="w-12 h-12 rounded-full border border-lighter" />
-          <div class="block ml-4">
-            <p class="text-sm font-bold leading-tight"> {{ friend.name }} </p>
-            <p class="text-sm leading-tight"> {{ friend.handle }} </p>
+
+        <div v-if="isLoggedIn">
+          <div v-for="user in usersFromFirebase" :key="user.username"
+            class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+            <img src="../assets/profile.png" class="w-12 h-12 rounded-full border border-lighter" />
+            <div class="block ml-4">
+              <p class="text-sm font-bold leading-tight">{{ user.username }}</p>
+              <p class="text-sm leading-tight">{{ user.email }}</p>
+            </div>
+            <button v-if="followingStatus[user.username]" @click="unfollowUser(userName, user.username)"
+              class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+              Unfollow
+            </button>
+            <button v-else @click="followUser(userName, user.username)"
+              class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+              Follow
+            </button>
           </div>
-          <button class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
-            Follow
-          </button>
-        </button>
+        </div>
+        <div v-else>
+          <h1 class="text-red font-bold">You must log in</h1>
+        </div>
         <button class="p-3 w-full hover:bg-lighter text-left text-blue border-t border-lighter">
           Show More
         </button>
       </div>
     </div>
   </div>
-  <ImageUpload :show="showModal" @close="showModal = false" @upload="handleImageUpload()" />
+  <ImageUpload :show="showModal" @close="showModal = false" @upload="handleImageUpload" />
 </template>
 
 <script setup>
