@@ -51,6 +51,10 @@
 					<input id="pass" type="text" class="input" v-model="email">
 				</div>
 				<div class="group">
+					<label for="pass" class="label">Url of picture profile (not necessary)</label>
+					<input id="pass" type="text" class="input" v-model="pictureProfileSignIn">
+				</div>
+				<div class="group">
 					<input type="submit" class="button" value="Sign Up" @click="register(router)">
 				</div>
 				<div class="hr"></div>
@@ -62,7 +66,7 @@
 		</div>
 	</div>
 </div>
-<!-- <button @click="addPost({comment:'andamos andando',url:'https://images.unsplash.com/photo-1637825891028-564f672aa42c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },'a2', 'ando2@gmail.com')">dfdfdfd</button> -->
+<!-- <button @click="addPost({comment:'andamos andando',url:'https://images.unsplash.com/photo-1637825891028-564f672aa42c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },'sda', 'ando@gmail.com')">dfdfdfd</button> -->
 <!-- <button @click="deletePost(2,'sda' )"></button> -->
 <!-- <button @click="getPosts('sda')"></button> -->
  <!-- <button @click="getPostById('sda',3)"></button>  -->
@@ -95,7 +99,8 @@ import {
     confirmPassword, 
     userName, 
     register, 
-    signOutUser 
+    signOutUser ,
+	pictureProfileSignIn
   } from '@/scripts/LogInScripts';
 
 import {addPost, deletePost, getPosts, getPostById, likePost, unlikePost, followUser, unfollowUser, getPostsFollowing} from '@/scripts/firebaseScripts'

@@ -4,7 +4,7 @@
     <div class="w-1/5 border-r border-lighter px-6 py-2 flex flex-col justify-between">
       <div>
         <button class="h-12 w-12 hover:bg-lightblue text-3xl rounded-full text-blue">
-          <i class="fab fa-twitter"></i>
+          
         </button>
         <div>
           <button v-for="tab in tabs" @click="id = tab.id"
@@ -18,11 +18,11 @@
       <div class="w-full relative">
         <button v-if="isLoggedIn" @click="dropdown = true"
           class="flex items-center w-full hover:bg-lightblue rounded-full p-2 focus:outline-none">
-          <img src="../assets/profile.png" class="w-10 h-10 rounded-full border border-lighter" />
+          <img :src="profilePictureUser" class="w-10 h-10 rounded-full border border-lighter" />
 
           <div class="block ml-4">
             <p class="text-sm font-bold leading-tight"> {{ userName }} </p>
-            <p class="text-sm leading-tight"> {{ email }}{{ emailSign }} </p>
+            <p class="text-sm leading-tight"> {{ email }} </p>
           </div>
 
           <i class="block fas fa-angle-down ml-auto text-lg"></i>
@@ -42,10 +42,10 @@
         <div v-if="dropdown === true"
           class="absolute bottom-0 left-0 w-64 rounded-lg shadow-md border-lightest bg-white mb-16">
           <button @click="dropdown = false" class="p-3 flex items-center w-full hover:bg-lightest focus:outline-none">
-            <img src="../assets/profile.png" class="w-10 h-10 rounded-full border border-lighter" />
+            <img :src="profilePictureUser" class="w-10 h-10 rounded-full border border-lighter" />
             <div class="ml-4">
               <p class="text-sm font-bold leading-tight"> {{ userName }} </p>
-              <p class="text-sm leading-tight"> {{ email }}{{ emailSign }} </p>
+              <p class="text-sm leading-tight"> {{ email }} </p>
             </div>
             <i class="fas fa-check ml-auto test-blue"></i>
           </button>
@@ -68,67 +68,28 @@
         <h1 class="text-xl font-bold">Home</h1>
 
       </div>
+
+
+
+
       <div class="px-5 py-3 border-b-8 border-lighter flex">
         <div class="flex-none">
-          <img src="../assets/profile.png" class="flex-none w-12 h-12 rounded-full border border-lighter" />
+          <img :src="profilePictureUser" class="flex-none w-12 h-12 rounded-full border border-lighter" />
         </div>
-        <form v-on:submit.prevent="addNewTweet" class="w-full px-4 relative">
-          <textarea v-model="tweet.content" placeholder="What's up?" class="mt-3 pb-3 w-full focus:outline-none" />
+        <form v-on:submit.prevent="" class="w-full px-4 relative">
+          <textarea v-model="uploadPost.comment" placeholder="What's up?" class="mt-3 pb-3 w-full focus:outline-none" />
           <div class="flex items-center">
             <button @click="showModal = true">
               <i class="text-lg text-blue mr-4 far fa-image"></i>
             </button>
-            <i class="text-lg text-blue mr-4 fas fa-film"></i>
-            <i class="text-lg text-blue mr-4 far fa-chart-bar"></i>
-            <i class="text-lg text-blue mr-4 far fa-smile"></i>
+
           </div>
-          <button type="submit"
+          <button @click="handleAddPost(uploadPost, userName, email)" type="submit"
             class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue focus:outline-none rounded-full absolute bottom-0 right-0">
-            Tweet
+            Post
           </button>
         </form>
       </div>
-      <div class="flex flex-col-reverse">
-        <div v-for="tweet in tweets" class="w-full p-4 border-b hover:bg-lighter flex">
-          <div class="flex-none mr-4">
-            <img src="../assets/profile.png" class="h-12 w-12 rounded-full flex-none" />
-          </div>
-          <div class="w-full">
-            <div class="flex items-center w-full">
-              <p class="font-semibold"> {{ userName }} </p>
-              <p class="text-sm text-dark ml-2"> {{ email }}{{ emailSign }} </p>
-              <p class="text-sm text-dark ml-2"> 1 sec </p>
-              <i class="fas fa-angle-down text-dark ml-auto"></i>
-            </div>
-            <p class="py-2 text-left">
-              {{ tweet }}
-              {{  }}
-            </p>
-            <div class="flex items-center justify-between w-full">
-              <div class="flex items-center text-sm text-dark">
-                <i class="far fa-comment mr-3"></i>
-                <p> 0 </p>
-              </div>
-              <div class="flex items-center text-sm text-dark">
-                <i class="fas fa-retweet mr-3"></i>
-                <p> 0 </p>
-              </div>
-              <div class="flex items-center text-sm text-dark">
-                <i class="fas fa-heart mr-3"></i>
-                <p> 1 </p>
-              </div>
-              <div class="flex items-center text-sm text-dark">
-                <i class="fas fa-share-square mr-3"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-
-
-
 
 
 
@@ -137,7 +98,7 @@
       <div class="flex flex-col-reverse">
         <div v-for="post in posts" class="w-full p-4 border-b hover:bg-lighter flex">
           <div class="flex-none mr-4">
-            <img src="../assets/profile.png" class="h-12 w-12 rounded-full flex-none" />
+            <img :src="post.pictureProfile" class="h-12 w-12 rounded-full flex-none" />
           </div>
           <div class="w-full">
             <div class="flex items-center w-full">
@@ -152,8 +113,6 @@
               {{ post.comment }}
             </p>
             <div class="flex items-center justify-between w-full">
-
-
 
               <button v-if="userLikedPostsMap[post.postid]" class="flex items-center text-sm text-pink-500"
                 @click="unlikePost(post.username, userName, post.postid)">
@@ -171,43 +130,37 @@
                 <i class="fas fa-share-square mr-3"></i>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div v-for="follow in following" class="w-full p-4 border-b hover:bg-lighter flex">
-        <div class="flex-none mr-4">
-          <img :src="`${follow.src}`" class="h-12 w-12 rounded-full flex-none" />
-        </div>
-        <div class="w-full">
-          <div class="flex items-center w-full">
-            <p class="font-semibold"> {{ follow.name }} </p>
-            <p class="text-sm text-dark ml-2"> {{ follow.handle }} </p>
-            <p class="text-sm text-dark ml-2"> {{ follow.time }} </p>
-            <i class="fas fa-angle-down text-dark ml-auto"></i>
-          </div>
-          <p class="py-2 text-left">
-            {{ follow.tweet }}
-          </p>
-          <div class="flex items-center justify-between w-full">
-            <button class="flex items-center text-sm text-dark" @click="">
-              <i class="far fa-comment mr-3"></i>
-              <p> {{ follow.comments }} </p>
-            </button>
-            <div class="flex items-center text-sm text-dark">
-              <i class="fas fa-retweet mr-3"></i>
-              <p> {{ follow.retweets }} </p>
-            </div>
-            <button :class="`flex items-center text-sm ${follow.isLiked ? 'text-pink-500' : 'text-dark'}`"
-              @click="toggleLike(follow)">
-              <i class="fas fa-heart mr-3"></i>
-              <p> {{ follow.like }}</p>
-            </button>
-            <div class="flex items-center text-sm text-dark">
-              <i class="fas fa-share-square mr-3"></i>
+            <div v-if="isAdmin">
+              <h1 style="font-weight: 900;">EDIT POST</h1>
+              <div style="margin-top: 20px;">
+                <input type="text" v-model="commentBackOffice" placeholder="edit the comment" style="background-color: darkblue; color: white;">
+              </div>
+              <div style="margin-top: 20px;">
+                <input type="text" v-model="urlBackOffice" placeholder="edit the url of the picture"
+                  style="background-color: darkblue; color: white;">
+              </div>
+              <div style="margin-top: 20px;">
+                <button @click="handleEditPost(post.postid, post.username, commentBackOffice, urlBackOffice)" 
+                  class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue focus:outline-none rounded-full bottom-0 right-0">
+                  edit the post
+                </button>
+                
+              </div>
+              <div style="margin-top: 20px;">
+                <button @click="handleDeletePost(post.postid, post.username)" 
+                  class="h-10 px-4 text-white font-semibold bg-red-700 hover:bg-black focus:outline-none rounded-full bottom-0 right-0">
+                  delete this post
+                </button>
+                
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+
+
+
     </div>
     <!-- trending -->
     <div class="md:block hidden w-1/3 h-full border-l border-lighter py-2 px-6 overflow-y-scroll relative">
@@ -241,22 +194,46 @@
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
 
-        <div v-if="isLoggedIn">
-          <div v-for="user in usersFromFirebase" :key="user.username"
-            class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
-            <img src="../assets/profile.png" class="w-12 h-12 rounded-full border border-lighter" />
-            <div class="block ml-4">
-              <p class="text-sm font-bold leading-tight">{{ user.username }}</p>
-              <p class="text-sm leading-tight">{{ user.email }}</p>
+        <div v-if="isAdmin">
+          <div v-for="user in usersFromFirebase" :key="user.username">
+            <div v-if="user.username != userName" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+              <div class="block ml-4">
+                <p class="text-sm font-bold leading-tight">{{ user.username }}</p>
+                <p class="text-sm leading-tight">{{ user.email }}</p>
+              </div>
+              <button v-if="followingStatus[user.username]" @click="unfollowUser(userName, user.username)"
+                class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+                Unfollow
+              </button>
+              <button v-else @click="followUser(userName, user.username)"
+                class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+                Follow
+              </button>
+              <button  @click="handleDeleteUser(user.username)"
+                class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+                DELETE USER
+              </button>
             </div>
-            <button v-if="followingStatus[user.username]" @click="unfollowUser(userName, user.username)"
-              class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
-              Unfollow
-            </button>
-            <button v-else @click="followUser(userName, user.username)"
-              class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
-              Follow
-            </button>
+          </div>
+        </div>
+
+        <div v-if="isLoggedIn && !isAdmin">
+          <div v-for="user in usersFromFirebase" :key="user.username">
+            <div v-if="user.username != userName" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+              <img :src="user.pictureProfile" class="w-12 h-12 rounded-full border border-lighter" />
+              <div class="block ml-4">
+                <p class="text-sm font-bold leading-tight">{{ user.username }}</p>
+                <p class="text-sm leading-tight">{{ user.email }}</p>
+              </div>
+              <button v-if="followingStatus[user.username]" @click="unfollowUser(userName, user.username)"
+                class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+                Unfollow
+              </button>
+              <button v-else @click="followUser(userName, user.username)"
+                class="ml-auto text-sm text-blue py-1 px-4 rounded-full border-2 border-blue">
+                Follow
+              </button>
+            </div>
           </div>
         </div>
         <div v-else>
@@ -275,39 +252,25 @@
 import { ref, reactive, onMounted, watch } from 'vue';
 import '../assets/index.css';
 import ImageUpload from './ImageUpload.vue';
-import { useAuth } from '@/scripts/LogInScripts';
+import { useAuth, profilePictureUser } from '@/scripts/LogInScripts';
 
 const imageUrl = ref('')
 
 const showModal = ref(false);
 
+import { uploadPost, commentBackOffice, urlBackOffice, deleteUser } from '@/scripts/firebaseScripts'
+
 const handleImageUpload = (Url) => {
-  imageUrl.value = (Url);
-  console.log(imageUrl)
+  uploadPost.url = (Url);
+
 };
 
-function toggleLike(post) {
-
-  if (post.isLiked) {
-    post.isLiked = false;
-    post.like -= 1;
-  }
-  else {
-    post.isLiked = true;
-    post.like += 1;
-  }
-};
 
 const { isLoggedIn } = useAuth();
 
 
-// import {
-//   getPosts, getPostById, postsToShow, getPostsFollowing,
-//   getUsers, likePost as likePostFirebase, unlikePost as unlikePostFirebase,
-//   userLikedPost, isUserFollowing, unfollowUser, followUser
-// } from '@/scripts/firebaseScripts'
 import {
-  getPosts, getPostById, postsToShow, getPostsFollowing,
+  getPosts, addPost, deletePost, editPost, getPostById, postsToShow, getPostsFollowing,
   getUsers, likePost as likePostFirebase, unlikePost as unlikePostFirebase,
   userLikedPost, isUserFollowing as isUserFollowingFirebase, unfollowUser as unfollowUserFirebase, followUser as followUserFirebase
 } from '@/scripts/firebaseScripts'
@@ -325,11 +288,19 @@ import {
   confirmPassword,
   userName,
   register,
-  signOutUser
+  signOutUser,
+  isAdmin
 } from '@/scripts/LogInScripts';
+import { comment } from 'postcss';
 
 let posts = ref([]);
 let usersFromFirebase = ref([]);
+
+
+if (email.value == '') {
+  email.value = emailSign.value
+}
+
 
 
 
@@ -337,19 +308,23 @@ let userLikedPostsMap = ref({});
 let followingStatus = ref({});
 
 async function loadPosts() {
-  if (isLoggedIn.value) {
-    const userPosts = await getPosts(userName.value);
-    const followingPosts = await getPostsFollowing(userName.value);
-    posts.value = userPosts.concat(followingPosts);
+  try {
+    if (isLoggedIn.value) {
+      const userPosts = await getPosts(userName.value);
+      const followingPosts = await getPostsFollowing(userName.value);
+      posts.value = userPosts.concat(followingPosts);
 
-    let promises = posts.value.map(post => userLikedPost(post.username, userName.value, post.postid));
-    let results = await Promise.all(promises);
-    results.forEach((result, index) => {
-      userLikedPostsMap.value[posts.value[index].postid] = result;
-    });
+      let promises = posts.value.map(post => userLikedPost(post.username, userName.value, post.postid));
+      let results = await Promise.all(promises);
+      results.forEach((result, index) => {
+        userLikedPostsMap.value[posts.value[index].postid] = result;
+      });
+    }
+    usersFromFirebase.value = await getUsers();
+    await updateFollowingStatus();
+  } catch (error) {
+    console.error('Error loading posts:', error);
   }
-  usersFromFirebase.value = await getUsers();
-  updateFollowingStatus();
 }
 
 async function updateFollowingStatus() {
@@ -385,6 +360,43 @@ async function unfollowUser(currentUser, targetUser) {
   await loadPosts();
 }
 
+async function handleAddPost(uploadPost, userName, email) {
+  try {
+    await addPost(uploadPost, userName, email);
+    await loadPosts();
+  } catch (error) {
+    console.error('Error adding post:', error);
+  }
+}
+
+async function handleEditPost(postId, username, commentBackOffice, urlBackOffice) {
+  try {
+    await editPost(postId, username, commentBackOffice, urlBackOffice);
+    await loadPosts();
+  } catch (error) {
+    console.error('Error editing post:', error);
+  }
+}
+
+async function handleDeletePost(postId, username) {
+  try {
+    await deletePost(postId, username);
+    await loadPosts();
+  } catch (error) {
+    console.error('Error deleting post:', error);
+  }
+}
+
+async function handleDeleteUser(username) {
+  try {
+    await deleteUser(username);
+    await loadPosts();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+  }
+}
+
+
 watch(usersFromFirebase, updateFollowingStatus, { immediate: true });
 
 onMounted(loadPosts);
@@ -415,32 +427,7 @@ const trending = ref([
   { top: 'Trending', title: 'When Beyonce', bottom: '25.4k tweets' },
 ]);
 
-const friends = ref([
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy' },
-  { src: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fG1hbiUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D', name: 'Adrian Monk', handle: '@detective:)' },
-  { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock' },
-]);
 
-const following = ref([
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: 120000, postId: 1, isLiked: false },
-  { src: 'https://pyxis.nymag.com/v1/imgs/43a/17c/81dbba23ebc19c4153592a29cb067c0f3f-kevin-hart.rsquare.w330.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: 20003, postId: 2, isLiked: false },
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: 5000003, postId: 3, isLiked: false },
-  { src: 'https://images.wsj.net/im-327392/square', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: 5000103, postId: 4, isLiked: false },
-]);
-
-const tweets = ref([
-  { content: 'It is so nice outside!', image: "" },
-]);
-
-const tweet = reactive({ content: "", image: "" });
-
-function addNewTweet() {
-  const newTweet = {
-    content: tweet.content,
-    image: imageUrl
-  };
-  tweets.value.push(newTweet);
-}
 
 const LandingPage = {
   name: 'LandingPage',

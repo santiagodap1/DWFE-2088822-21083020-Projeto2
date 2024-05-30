@@ -29,15 +29,18 @@ var errMsg = ref()
 var user = ref('')
 
 const emptyForm = () => {
-  email.value = ''
   password.value = ''
-  emailSign.value = ''
   passwordSign.value = ''
   errMsg.value =''
 }
 var userName = ref('')
 import db from '../firebase/init.js'
 
+export var profilePictureUser = ref('')
+
+import { getProfilePicture } from '@/scripts/firebaseScripts';
+
+export var isAdmin = ref(false)
 
 const registerSign = async (router) => {
     const auth = getAuth();
@@ -56,6 +59,13 @@ const registerSign = async (router) => {
               user.value = auth.currentUser;
               console.log(auth.currentUser);
               toggleLogin();
+              email.value = emailSign.value
+              isLoggedIn.value = true;
+              getProfilePicture(userName.value);
+              if (userName.value === 'admin' && passwordSign.value === 'admin1') {
+                isAdmin.value = true;
+                console.log('Admin logged in');
+              }
               router.push('/');
             })
             .catch((error) => {
@@ -99,6 +109,8 @@ var confirmPassword = ref('')
 
 import { addUser, userExists } from '@/scripts/firebaseScripts';
 
+export var pictureProfileSignIn = ref('')
+
 const register = async (router) => {
     
   if (password.value !== confirmPassword.value) {
@@ -119,8 +131,10 @@ const register = async (router) => {
       console.log('Successfully registered!');
       user.value = auth.currentUser;
       
-      addUser(userName.value)
+      addUser(userName.value, pictureProfileSignIn.value)
 	  toggleLogin()
+      getProfilePicture(userName.value);
+      isAdmin.value = false;
       router.push('/')
     })
     .catch((error) => {
@@ -143,6 +157,7 @@ async function signOutUser() {
         await signOut(auth);
         emptyForm()
 		toggleLogin();
+        isAdmin.value = false;
         console.log('User signed out successfully');
     } catch (error) {
         console.error('Error signing out: ', error);

@@ -1,8 +1,8 @@
-import { collection, addDoc, doc, setDoc, getDocs, query, where, getDoc, runTransaction } from 'firebase/firestore';
-import {  updateDoc, arrayUnion, arrayRemove, writeBatch, increment, getFirestore } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, getDocs, query, where, getDoc, runTransaction, deleteDoc } from 'firebase/firestore';
+import { updateDoc, arrayUnion, arrayRemove, writeBatch, increment, getFirestore } from 'firebase/firestore';
 import db from '../firebase/init.js'
 import { email } from './LogInScripts.js';
-import { ref } from 'vue';  
+import { ref } from 'vue';
 export var postsToShow = ref([])
 
 export async function addPost(post, username, email) {
@@ -13,22 +13,65 @@ export async function addPost(post, username, email) {
             const userDoc = await transaction.get(userDocRef);
 
             if (!userDoc.exists()) {
-                const newPost = { postid: 1, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') , username: username, email: email};
+                const newPost = { postid: 1, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' '), username: username, email: email, pictureProfile: profilePictureUser.value };
                 transaction.set(userDocRef, { username: username, email: email, posts: [newPost] });
             } else {
                 const posts = userDoc.data().posts || [];
                 const newPostId = posts.length > 0 ? posts[posts.length - 1].postid + 1 : 1;
-                const newPost = { postid: newPostId, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' '), username: username, email: email };
+                const newPost = { postid: newPostId, comment: post.comment, url: post.url, qt_likes: 0, likes: [], created_at: new Date().toISOString().slice(0, 16).replace('T', ' '), username: username, email: email, pictureProfile: profilePictureUser.value };
                 posts.push(newPost);
                 transaction.update(userDocRef, { posts: posts });
             }
         });
         console.log('Post added successfully');
+        uploadPost.value = { comment: '', url: '' };
     } catch (error) {
         console.error('Error adding post: ', error);
     }
 }
 
+export var commentBackOffice = ref('')
+export var urlBackOffice = ref('')
+
+export var msgOfSuccessEdit = ref('')
+export var msgOfSuccessEditPostId = ref('')
+
+export async function editPost(postId, username, comment, url) {
+    const userDocRef = doc(db, 'posts', username);
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userDoc = await transaction.get(userDocRef);
+
+            if (userDoc.exists()) {
+                const posts = userDoc.data().posts || [];
+                const postIndex = posts.findIndex(post => post.postid === postId);
+
+                if (postIndex !== -1) {
+                    posts[postIndex].comment = comment;
+                    posts[postIndex].url = url;
+                    transaction.update(userDocRef, { posts: posts });
+                } else {
+                    console.error('Post not found');
+                }
+            } else {
+                console.error('User not found');
+            }
+        });
+        commentBackOffice.value = '';
+        urlBackOffice.value = '';
+        msgOfSuccessEdit.value = 'Post edited successfully, refresh to see changes';
+        msgOfSuccessEditPostId.value = postId;
+        console.log('Post edited successfully');
+    } catch (error) {
+        console.error('Error editing post: ', error);
+    }
+}
+
+export var uploadPost = ref({ comment: '', url: '' });
+
+export var msgOfSuccessDelete = ref('')
+export var msgOfSuccessDeletePostId = ref('')
 
 export async function deletePost(postId, username) {
     const userDocRef = doc(db, 'posts', username);
@@ -43,6 +86,7 @@ export async function deletePost(postId, username) {
 
                 if (postToDelete) {
                     transaction.update(userDocRef, { posts: arrayRemove(postToDelete) });
+                    
                 } else {
                     console.log('Post not found');
                 }
@@ -50,6 +94,8 @@ export async function deletePost(postId, username) {
                 console.log('User not found');
             }
         });
+        msgOfSuccessDelete.value = 'Post deleted successfully, refresh to see changes';
+        msgOfSuccessDeletePostId.value = postId;
         console.log('Post deleted successfully');
     } catch (error) {
         console.error('Error deleting post: ', error);
@@ -204,19 +250,19 @@ export async function unlikePost(posterUsername, likerUsername, postId) {
 }
 
 export async function userLikedPost(posterUserName, likerUserName, postId) {
-    
+
     const postDocRef = doc(db, 'posts', posterUserName);
 
-    
+
     const postDoc = await getDoc(postDocRef);
     if (postDoc.exists()) {
-    
+
         const postData = postDoc.data();
 
-    
+
         const post = postData.posts.find(post => post.postid === postId);
 
-    
+
         if (post && post.likes.includes(likerUserName)) {
             // console.log('User has liked the post');
             return true;
@@ -252,6 +298,10 @@ export async function addUser(username, pictureProfile) {
 
     const userDocRef = doc(db, 'users', username);
 
+    if (pictureProfile === '') {
+        pictureProfile = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+    }
+
     try {
         await setDoc(userDocRef, {
             username: username,
@@ -270,11 +320,28 @@ export async function addUser(username, pictureProfile) {
     }
 }
 
+
+
+export async function deleteUser(username) {
+    const userDocRef = doc(db, 'users', username);
+    const postDocRef = doc(db, 'posts', username);
+
+    try {
+        await deleteDoc(userDocRef);
+        await deleteDoc(postDocRef);
+        console.log('User deleted successfully');
+        return true;
+    } catch (error) {
+        console.error('Error deleting user: ', error);
+        return false;
+    }
+}
+
 export async function followUser(currentUser, userToFollow) {
     const currentUserDocRef = doc(db, 'users', currentUser);
     const userToFollowDocRef = doc(db, 'users', userToFollow);
 
-    
+
     const currentUserDoc = await getDoc(currentUserDocRef);
     if (currentUserDoc.exists()) {
         const currentUserData = currentUserDoc.data();
@@ -284,7 +351,7 @@ export async function followUser(currentUser, userToFollow) {
         }
     }
 
-    
+
     const batch = writeBatch(db);
 
     batch.update(currentUserDocRef, {
@@ -311,7 +378,7 @@ export async function unfollowUser(currentUser, userToUnfollow) {
     const currentUserDocRef = doc(db, 'users', currentUser);
     const userToUnfollowDocRef = doc(db, 'users', userToUnfollow);
 
-    
+
     const currentUserDoc = await getDoc(currentUserDocRef);
     if (currentUserDoc.exists()) {
         const currentUserData = currentUserDoc.data();
@@ -321,22 +388,22 @@ export async function unfollowUser(currentUser, userToUnfollow) {
         }
     }
 
-    
+
     const batch = writeBatch(db);
 
-    
+
     batch.update(currentUserDocRef, {
         following: arrayRemove(userToUnfollow),
         qt_following: increment(-1)
     });
 
-    
+
     batch.update(userToUnfollowDocRef, {
         followers: arrayRemove(currentUser),
         qt_followers: increment(-1)
     });
 
-    
+
     try {
         await batch.commit();
         console.log('User unfollowed successfully');
@@ -348,23 +415,29 @@ export async function unfollowUser(currentUser, userToUnfollow) {
 }
 
 export async function isUserFollowing(currentUsername, targetUsername) {
+    if (!currentUsername || !targetUsername) {
+        console.error('Invalid arguments for isUserFollowing:', { currentUsername, targetUsername });
+        return false;
+    }
+
     const userDocRef = doc(db, 'users', currentUsername);
-  
+    console.log('Getting document for:', { userDocRef, currentUsername, targetUsername });
+
     try {
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
-          const userData = userDoc.data();
-          return userData.following.includes(targetUsername);
+            const userData = userDoc.data();
+            console.log('User data fetched successfully:', userData);
+            return userData.following.includes(targetUsername);
         } else {
-          console.log('No such user!');
-          return false;
+            console.log('No such user:', currentUsername);
+            return false;
         }
-      } catch (error) {
-        console.error('Error getting user: ', error);
+    } catch (error) {
+        console.error('Error getting user:', { currentUsername, targetUsername, error });
         return false;
-      }
+    }
 }
-
 
 export async function getUsers() {
     const usersCollectionRef = collection(db, 'users');
@@ -377,5 +450,28 @@ export async function getUsers() {
     } catch (error) {
         console.error('Error getting users: ', error);
         return [];
+    }
+}
+
+import { profilePictureUser } from './LogInScripts.js';
+
+export async function getProfilePicture(userName) {
+    const userDocRef = doc(db, 'users', userName);
+
+    try {
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            console.log(userData);
+            profilePictureUser.value = userData.pictureProfile;
+
+        } else {
+            console.log('No such document!');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error getting user: ', error);
+        return null;
     }
 }

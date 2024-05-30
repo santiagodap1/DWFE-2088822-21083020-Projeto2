@@ -5,9 +5,9 @@
           <h2 class="text-xl font-semibold">Enter Image URL</h2>
           <button @click="closeModal" class="text-red-600">&times;</button>
         </div>
-        <input v-model="imageUrl" type="text" placeholder="Enter image URL" class="mb-4 w-full border p-2 rounded" />
-        <div v-if="imageUrl" class="mb-4">
-          <img :src="imageUrl" alt="Image Preview" class="w-full h-auto" />
+        <input v-model="uploadPost.url" type="text" placeholder="Enter image URL" class="mb-4 w-full border p-2 rounded" />
+        <div v-if="uploadPost.url" class="mb-4">
+          <img :src="uploadPost.url" alt="Image Preview" class="w-full h-auto" />
         </div>
         <div class="flex justify-end">
           <button @click="submitUrl" class="bg-blue text-white py-2 px-4 rounded mr-2">Submit</button>
@@ -26,10 +26,13 @@
   
   const emit = defineEmits(['close', 'upload']);
   
-  const imageUrl = ref('');
+  // const imageUrl = ref('');
+
+  import { uploadPost } from '@/scripts/firebaseScripts';
   
   const submitUrl = () => {
-    emit('upload', imageUrl.value)
+    emit('upload', uploadPost.url)
+    console.log(uploadPost.url);
     closeModal();
   };
   
