@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="flex container h-screen w-full">
     <!-- side nav -->
-    <div class="w-1/5 border-r border-lighter px-6 py-2 flex flex-col justify-between">
+    <div class="w-1/5 border-r border-lighter px-6 py-2 flex flex-col justify-between sidebar">
       <div>
         <button class="h-12 w-12 hover:bg-lightblue text-3xl rounded-full text-blue">
           
@@ -12,8 +12,15 @@
             <i :class="`${tab.icon} text-2xl mr-4 text-left`"></i>
             <p class="text-lg font-semibold text-left block"> {{ tab.title }} </p>
           </button>
+          <button @click="toggleTheme" class="focus:outline-none hover:text-blue flex items-center py-2 px-4 hover:bg-lightblue rounded-full mr-auto mb-3" v-if="themeStore.theme == 'light'">
+            <i class="text-2xl mr-4 text-left"></i>
+            <p class="text-lg font-semibold text-left block"> Dark theme </p>
+          </button>
+          <button @click="toggleTheme" class="focus:outline-none hover:text-blue flex items-center py-2 px-4 hover:bg-lightblue rounded-full mr-auto mb-3" v-if="themeStore.theme == 'dark'">
+            <i class="text-2xl mr-4 text-left"></i>
+            <p class="text-lg font-semibold text-left block"> Light theme </p>
+          </button>
         </div>
-
       </div>
       <div class="w-full relative">
         <button v-if="isLoggedIn" @click="dropdown = true"
@@ -24,21 +31,16 @@
             <p class="text-sm font-bold leading-tight"> {{ userName }} </p>
             <p class="text-sm leading-tight"> {{ email }} </p>
           </div>
-
           <i class="block fas fa-angle-down ml-auto text-lg"></i>
         </button>
-
         <div v-if="isLoggedIn === false">
           <router-link :to="`/login`">
             <button
               class="text-white bg-blue rounded-full font-semibold focus:outline-none h-auto w-full p-3 hover:bg-darkblue">
               <p class="block">Log In</p>
             </button>
-
           </router-link>
         </div>
-
-
         <div v-if="dropdown === true"
           class="absolute bottom-0 left-0 w-64 rounded-lg shadow-md border-lightest bg-white mb-16">
           <button @click="dropdown = false" class="p-3 flex items-center w-full hover:bg-lightest focus:outline-none">
@@ -62,16 +64,10 @@
       justify-content: center; align-items: center;">
       <h1 style="color: red; color: red; font-size: 30px; font-weight: 900;">You have to log in</h1>
     </div>
-
     <div class="w-full md:w-1/2 h-full overflow-y-scroll" v-if="isLoggedIn">
       <div class="px-5 py-3 border-b border-lighter flex items-center justify-between">
         <h1 class="text-xl font-bold">Home</h1>
-
       </div>
-
-
-
-
       <div class="px-5 py-3 border-b-8 border-lighter flex">
         <div class="flex-none">
           <img :src="profilePictureUser" class="flex-none w-12 h-12 rounded-full border border-lighter" />
@@ -90,11 +86,6 @@
           </button>
         </form>
       </div>
-
-
-
-
-
       <div class="flex flex-col-reverse">
         <div v-for="post in posts" class="w-full p-4 border-b hover:bg-lighter flex">
           <div class="flex-none mr-4">
@@ -166,17 +157,17 @@
     <div class="md:block hidden w-1/3 h-full border-l border-lighter py-2 px-6 overflow-y-scroll relative">
       <input class="pl-12 rounded-full w-full p-2 bg-lighter text-sm mb-4" placeholder="Search Twitter" />
       <i class="fas fa-search absolute left-0 top-0 mt-5 ml-12 text-sm text-light"></i>
-      <div class="w-full rounded-lg bg-lightest">
+      <div class="w-full rounded-lg bg-lightest trends">
         <div class="flex items-center justify-between p-3">
           <p class="text-lg font-bold">Trends for You</p>
           <i class="fas fa-cog text-lg text-blue"></i>
         </div>
         <button v-for="trend in trending"
-          class="w-full flex justify-between hover:bg-lighter p-3 border-t border-lighter">
+          class="w-full flex justify-between hover:bg-lighter p-3 border-t border-lighter trends">
           <div>
-            <p class="text-xs text-left leading-tight text-dark"> {{ trend.top }} </p>
-            <p class="font-semibold text-sm text-left leading-tight"> {{ trend.title }} </p>
-            <p class="text-left text-sm leading-tight text-dark"> {{ trend.bottom }} </p>
+            <p class="text-xs text-left leading-tight text-dark trends"> {{ trend.top }} </p>
+            <p class="font-semibold text-sm text-left leading-tight trends"> {{ trend.title }} </p>
+            <p class="text-left text-sm leading-tight text-dark trends"> {{ trend.bottom }} </p>
           </div>
           <i class="fas fa-angle-down text-lg text-dark"></i>
         </button>
@@ -189,7 +180,7 @@
 
 
 
-      <div class="w-full rounded-lg bg-lightest my-4">
+      <div class="w-full rounded-lg bg-lightest my-4 trends">
         <div class=" p-3">
           <p class="text-lg font-bold">Who to Follow</p>
         </div>
@@ -239,7 +230,7 @@
         <div v-else>
           <h1 class="text-red font-bold">You must log in</h1>
         </div>
-        <button class="p-3 w-full hover:bg-lighter text-left text-blue border-t border-lighter">
+        <button class="p-3 w-full hover:bg-lighter text-left text-blue border-t border-lighter showmore">
           Show More
         </button>
       </div>
@@ -253,6 +244,37 @@ import { ref, reactive, onMounted, watch } from 'vue';
 import '../assets/index.css';
 import ImageUpload from './ImageUpload.vue';
 import { useAuth, profilePictureUser } from '@/scripts/LogInScripts';
+import { useThemeStore } from '../store/themeStore';
+
+const themeStore = useThemeStore();
+
+var colors = ""
+onMounted(() => {
+  colors = assignColors()
+})
+
+const toggleTheme = () => {
+        themeStore.setTheme(themeStore.theme === 'light' ? 'dark' : 'light');
+        colors = assignColors();
+    };
+
+const assignColors = () => {
+        const colors = {
+            background: themeStore.theme === "light" ? "#ffffff" : "#14161A",
+            primary: themeStore.theme === "light" ? "#484b6a" : "#181B20",
+            secondary: themeStore.theme === "light" ? "#E1E8ED" : "#6c757d",
+            tertiary: themeStore.theme === "light" ? "#d2d3db" : "#363b50",
+            text: themeStore.theme === "light" ? "#181B20" : "#6c757d",
+            text2: themeStore.theme === "light" ? "#000000" : "#ffffff"
+        };
+        document.documentElement.style.setProperty("--backg-color", colors.background);
+        document.documentElement.style.setProperty("--primary-color", colors.primary);
+        document.documentElement.style.setProperty("--secondary-color", colors.secondary);
+        document.documentElement.style.setProperty("--tertiary-color", colors.tertiary);
+        document.documentElement.style.setProperty("--text-color", colors.text);
+        document.documentElement.style.setProperty("--text-color2", colors.text2);
+        return colors;
+    };
 
 const imageUrl = ref('')
 
@@ -435,3 +457,20 @@ const LandingPage = {
 
 
 </script>
+<style>
+#app, textarea{
+  background-color: var(--backg-color) !important;
+  color: var(--text-color);
+}
+input{
+  background-color: var(--secondary-color) !important;
+}
+.trends{
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: var(--text-color2);
+}
+.showmore{
+  border-color: rgb(225 232 237 / var(--tw-border-opacity));
+}
+</style>
