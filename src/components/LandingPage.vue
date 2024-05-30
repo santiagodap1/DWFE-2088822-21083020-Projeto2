@@ -78,9 +78,10 @@
         </div>
         <form v-on:submit.prevent="" class="w-full px-4 relative">
           <textarea v-model="uploadPost.comment" placeholder="What's up?" class="mt-3 pb-3 w-full focus:outline-none" />
+          <img v-if="uploadPost.url!=''" :src="uploadPost.url" class="f w-40 h-40 " />
           <div class="flex items-center">
             <button @click="showModal = true">
-              <i class="text-lg text-blue mr-4 far fa-image"></i>
+              <i class="text-lg text-blue mr-4 far fa-image"></i><~click to upload an image
             </button>
 
           </div>
